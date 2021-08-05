@@ -1,5 +1,12 @@
 # vue-vuex
 
+
+# Sample
+
+Project Video: https://vimeo.com/583593519
+
+Unit test video: https://vimeo.com/583591979
+
 # Feature
 - User List
 - Add / Remove / Edit user
@@ -9,14 +16,6 @@
 - Virtual scroll list for performace for larger list
 - Debounce for searching
 - unit test case
-
-# Depedency
-- element-ui
-- vuex
-- vue-autosuggest
-- vue-virtual-scroller
-- vue
-- vue-router
 
 ## Project setup
 ```
@@ -32,9 +31,3 @@ yarn serve
 ```
 yarn build
 ```
-
-# Sample
-
-Project Video: https://vimeo.com/583593519
-
-Unit test video: https://vimeo.com/583591979
