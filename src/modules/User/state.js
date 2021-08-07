@@ -1,5 +1,6 @@
 export default {
   users: [],
+  tickets: [],
   selectedUser: {},
   assignedTickets: [],
   submitedTickets: [],

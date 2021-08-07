@@ -24,7 +24,7 @@
           </el-card>
           <br />
           <el-card class="box-card">
-            <div slot="header" class="clearfix">
+            <div slot="header" class="clearfix" v-if="selectedUserOrg && selectedUserOrg.id">
               <h3>Organization {{ selectedUserOrg.id }}</h3>
             </div>
             <div
@@ -67,7 +67,7 @@ export default {
     ]),
   },
   methods: {
-    ...mapActions("User", ["getUsers", "setSelectedUser"]),
+    ...mapActions("User", ["getUsers", "setSelectedUser", "getAllOrganization"]),
     clickHandler() {
       // event fired when clicking on the input
     },
@@ -96,6 +96,7 @@ export default {
     },
   },
   created() {
+    this.getAllOrganization()
     this.setSelectedUser({ selectedUserId: this.$route.params.id });
   },
 };

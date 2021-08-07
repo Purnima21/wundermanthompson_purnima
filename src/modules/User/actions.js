@@ -1,13 +1,13 @@
-import mockUser from "../../service/mockUser.json";
-import mockOrg from "../../service/mockOrg.json";
-import mockTicket from "../../service/mockTicket.json";
+import { getUserData } from "../../service/userService";
+import { getTicketData } from "../../service/ticketService";
+import { getOrgData } from "../../service/orgService";
 
-export function getUsers({ commit }, { key, value, userId }) {
+export function getUsers({ commit, rootState }, { key, value, userId }) {
   let data = [];
   if (userId) {
-    data = [mockUser.find((user) => user._id == userId)];
+    data = [rootState.User.users.find((user) => user._id == userId)];
   } else {
-    data = mockUser.filter(
+    data = rootState.User.users.filter(
       (user) =>
         user[key] &&
         String(user[key])
@@ -19,20 +19,15 @@ export function getUsers({ commit }, { key, value, userId }) {
 }
 
 export function getAllUsers({ commit, rootState }, { reset }) {
-  console.log(rootState)
-  if (rootState.User.users.length == 0) {
-    const data = mockUser;
-    commit("setUsers", data.reverse());
-  } else if (reset) {
-    const data = mockUser;
-    commit("setUsers", data.reverse());
+  if (rootState.User.users.length == 0 || reset) {
+    getUserData().then((users) => commit("setUsers", users.reverse()));
   }
 }
 
-export function getTicket({ commit }, { userId }) {
+function getSelectedUserTicket(tickets, userId, commit) {
   const assignedTickets = [];
   const submitedTicket = [];
-  mockTicket.forEach((ticket) => {
+  tickets.forEach((ticket) => {
     if (ticket.assignee_id === userId) {
       assignedTickets.push(ticket);
     }
@@ -40,16 +35,33 @@ export function getTicket({ commit }, { userId }) {
       submitedTicket.push(ticket);
     }
   });
+  commit("setAllTickets", tickets);
   commit("setAssignedTickets", assignedTickets);
   commit("setSubmitedTickets", submitedTicket);
 }
 
-export function getAllOrganization({ commit }) {
-  commit("setAllOrg", mockOrg);
+export function getTicket({ commit, rootState }, { userId }) {
+  console.log(rootState.User.tickets);
+  if (rootState.User.tickets.length > 0) {
+    getSelectedUserTicket(rootState.User.tickets, userId, commit);
+  } else {
+
+    getTicketData()
+      .then((tickets) => {
+        getSelectedUserTicket(tickets, userId, commit);
+      });
+  }
 }
 
-export function getOrganization({ commit }, { orgId }) {
-  const data = mockOrg.find((org) => org._id == orgId);
+export function getAllOrganization({ commit }) {
+  getOrgData()
+    .then((orgs) => {
+      commit("setAllOrg", orgs);
+    });
+}
+
+export function getOrganization({ commit, rootState }, { orgId }) {
+  const data = rootState.User.organization.find((org) => org._id == orgId);
   commit("setOrg", data);
 }
 
@@ -60,17 +72,30 @@ export function setSelectedUser(
   let selectedUser = rootState.User.users.find(
     (user) => user._id == selectedUserId
   );
-
   if (!selectedUser) {
-    selectedUser = mockUser.find((user) => user._id == selectedUserId);
+    getUserData()
+    .then(users => {
+      selectedUser = users.find(
+        (user) => user._id == selectedUserId
+      );
+      dispatch(
+        "User/getOrganization",
+        { orgId: selectedUser.organization_id },
+        { root: true }
+      );
+      dispatch("User/getTicket", { userId: selectedUser._id }, { root: true });
+      commit("setSelectedUserData", selectedUser);
+    })
+  } else{
+    dispatch(
+      "User/getOrganization",
+      { orgId: selectedUser.organization_id },
+      { root: true }
+    );
+    dispatch("User/getTicket", { userId: selectedUser._id }, { root: true });
+    commit("setSelectedUserData", selectedUser);
   }
-  dispatch(
-    "User/getOrganization",
-    { orgId: selectedUser.organization_id },
-    { root: true }
-  );
-  dispatch("User/getTicket", { userId: selectedUser._id }, { root: true });
-  commit("setSelectedUserData", selectedUser);
+  
 }
 
 export function showSelectedUser({ commit, dispatch, rootState }, { userId }) {
@@ -90,11 +115,8 @@ export function removeUser({ commit, rootState }, { userId }) {
 }
 
 export function createUser({ commit, rootState }, { data }) {
-  console.log(rootState.User.users[0]);
-  const id =
-    rootState.User.users && rootState.User.users[0]
-      ? +rootState.User.users[0]._id + 1
-      : 1;
+  console.log(data);
+  const id = rootState.User.users.length ? rootState.User.users.length + 1 : 1;
   const user = {
     _id: id,
     url: data.url || "",
@@ -150,11 +172,4 @@ export function editUser({ commit, rootState }, { data, userId }) {
   });
   commit("setUsers", users);
   return true;
-}
-
-export function getAllOrg({ commit, rootState }) {
-  if (rootState.User.users.length == 0) {
-    const data = mockUser;
-    commit("setUsers", data.reverse());
-  }
 }

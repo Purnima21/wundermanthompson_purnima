@@ -133,6 +133,7 @@ export default {
       "removeUser",
       "createUser",
       "editUser",
+      "getAllOrganization"
     ]),
     getArialLabel(prefix, user) {
       return `${prefix} ${user.name}`;
@@ -217,7 +218,9 @@ export default {
       this.dialogVisible = true;
     },
   },
-  created() {},
+  created() {
+    this.getAllOrganization()
+  },
 };
 </script>
 

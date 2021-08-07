@@ -22,3 +22,7 @@ export function setOrg (state, data) {
 export function setAllOrg (state, data) {
   state.organization = data
 }
+
+export function setAllTickets (state, data) {
+  state.tickets = data
+}
